@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>CarCare sign-in</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --text:#1d2433; --muted:#5b6475; --accent:#1c6bba; --ok:#1e7f4f; --err:#b3261e; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14171c; --card:#1f242c; --text:#e6e9ef; --muted:#9aa3b2; --accent:#6aa9ea; --ok:#5cc28f; --err:#f2877f; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+         display:flex; min-height:100vh; align-items:center; justify-content:center; padding:16px; }
+  .card { background:var(--card); max-width:560px; width:100%; padding:28px; border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,.08); }
+  h1 { margin:0 0 8px; font-size:1.4rem; }
+  p { margin:0 0 16px; color:var(--muted); }
+  .ok { color:var(--ok); } .err { color:var(--err); }
+  textarea { width:100%; height:110px; font:13px/1.4 ui-monospace, Consolas, monospace; padding:10px; border-radius:8px;
+             border:1px solid rgba(127,127,127,.35); background:transparent; color:var(--text); resize:none; word-break:break-all; }
+  button { margin-top:12px; padding:10px 18px; border:0; border-radius:8px; background:var(--accent); color:#fff; font-size:15px; cursor:pointer; }
+  #copied { margin-left:10px; color:var(--ok); }
+</style>
+</head>
+<body>
+<main class="card">
+  <h1 id="title">CarCare</h1>
+  <p id="msg">This page receives the Volvo ID sign-in result for the CarCare application.</p>
+  <div id="result" hidden>
+    <textarea id="url" readonly></textarea>
+    <button id="copy">Copy URL</button><span id="copied" hidden>Copied</span>
+    <p style="margin-top:16px">Paste this into the CarCare program at the prompt, then close this tab.</p>
+  </div>
+</main>
+<script>
+  const q = new URLSearchParams(location.search);
+  const title = document.getElementById("title"), msg = document.getElementById("msg");
+  if (q.has("error")) {
+    title.textContent = "Sign-in failed";
+    title.className = "err";
+    msg.textContent = q.get("error") + (q.get("error_description") ? ": " + q.get("error_description") : "");
+  } else if (q.has("code")) {
+    title.textContent = "Sign-in complete";
+    title.className = "ok";
+    msg.textContent = "Copy the address below back into CarCare.";
+    document.getElementById("result").hidden = false;
+    const box = document.getElementById("url");
+    box.value = location.href;
+    box.addEventListener("focus", () => box.select());
+    document.getElementById("copy").addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText(location.href); }
+      catch { box.select(); document.execCommand("copy"); }
+      document.getElementById("copied").hidden = false;
+    });
+  }
+</script>
+</body>
+</html>
